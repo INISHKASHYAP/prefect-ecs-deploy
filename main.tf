@@ -31,7 +31,7 @@ resource "aws_subnet" "public" {
   }
 }
 
-resource "aws_subnet" "private" {
+resource "aws_subnet" "private_1" {
   count = 3
   vpc_id                  = aws_vpc.prefect_vpc.id
   cidr_block              = cidrsubnet(aws_vpc.prefect_vpc.cidr_block, 8, count.index + 3)
@@ -42,7 +42,7 @@ resource "aws_subnet" "private" {
   }
 }
 
-resource "aws_subnet" "private" {
+resource "aws_subnet" "private_2" {
   count = 3
   vpc_id                  = aws_vpc.prefect_vpc.id
   cidr_block              = cidrsubnet(aws_vpc.prefect_vpc.cidr_block, 8, count.index + 3)
