@@ -165,3 +165,16 @@ resource "aws_ecs_task_definition" "prefect_task" {
 }
 
 
+resource "aws_ecs_service" "prefect_service" {
+  name            = "prefect-worker-service"
+  cluster         = aws_ecs_cluster.prefect_cluster.id
+  task_definition = aws_ecs_task_definition.prefect_task.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = aws_subnet.private[*].id
+    security_groups = [aws_security_group.prefect_sg.id]
+    assign_public_ip = false
+  }
+}
