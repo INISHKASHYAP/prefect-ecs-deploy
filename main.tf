@@ -51,3 +51,15 @@ resource "aws_subnet" "private" {
   }
 }
 
+resource "aws_eip" "prefect_nat_eip" {
+  vpc = true
+}
+
+resource "aws_nat_gateway" "prefect_nat_gateway" {
+  allocation_id = aws_eip.prefect_nat_eip.id
+  subnet_id     = aws_subnet.public[0].id
+  tags = {
+    Name = "prefect-nat-gateway"
+  }
+}
+
