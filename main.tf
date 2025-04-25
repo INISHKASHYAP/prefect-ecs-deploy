@@ -11,3 +11,11 @@ resource "aws_vpc" "prefect_vpc" {
   }
 }
 
+resource "aws_internet_gateway" "prefect_igw" {
+  vpc_id = aws_vpc.prefect_vpc.id
+  tags = {
+    Name = "prefect-ecs-igw"
+  }
+}
+
+
