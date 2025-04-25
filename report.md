@@ -1,161 +1,75 @@
-
-markdown
-Copy
-Edit
-# Prefect Worker on AWS ECS Fargate – Terraform Deployment
+# Prefect Worker on AWS ECS Fargate – Terraform Deployment Report
 
 ## Introduction
 
-This project sets up a Prefect 2.0 worker on Amazon ECS Fargate using Terraform. The objective was to create a fully automated and serverless infrastructure that could handle workflow orchestration through Prefect Cloud using ECS containers.
+This project involved setting up a **Prefect 2.0 worker** on **Amazon ECS Fargate** using **Terraform**. The aim was to automate the deployment of a serverless, scalable infrastructure for running Prefect workflows connected to **Prefect Cloud**.
 
-The setup provisions networking (custom VPC, subnets, NAT gateway), IAM roles, ECS services, service discovery, and secrets via AWS Secrets Manager — all wired together to allow seamless interaction with Prefect Cloud.
+The infrastructure includes the creation of a custom **VPC**, networking resources, ECS cluster and services, IAM roles, and **Secrets Manager** for secure API credential storage.
+
+## Key Objectives
+
+1. **Deploying ECS Fargate Worker**: Set up a scalable ECS Fargate worker that can execute Prefect workflows.
+2. **Infrastructure as Code**: Use **Terraform** to automate the entire infrastructure provisioning, ensuring a repeatable and scalable setup.
+3. **Integration with Prefect Cloud**: Ensure that the worker is registered in **Prefect Cloud** and connected to a specific **work pool**.
 
 ## Tools & Services Used
 
-- Terraform – for Infrastructure as Code (v1.2+)
-- Amazon ECS (Fargate) – to run containers without managing servers
-- AWS VPC – for isolated networking
-- AWS Secrets Manager – for securely storing Prefect credentials
-- AWS Cloud Map – for ECS service discovery
-- Prefect Cloud – to orchestrate and monitor flows
+- **Terraform**: Used to define and manage the infrastructure.
+- **Amazon ECS (Fargate)**: Container orchestration platform for running the Prefect worker without managing servers.
+- **AWS VPC**: Virtual networking for secure communication between services.
+- **AWS Secrets Manager**: Securely stores the Prefect API key for accessing Prefect Cloud.
+- **AWS Cloud Map**: Used for service discovery to allow ECS to locate the Prefect worker.
+- **Prefect Cloud**: Cloud service for orchestrating and monitoring Prefect workflows.
 
-## Project Structure
+## Infrastructure Setup
 
-prefect-ecs-iac/ ├── main.tf # Core infrastructure setup ├── variables.tf # Input variables ├── outputs.tf # Output values (e.g., ECS cluster ARN) ├── terraform.tfvars # Secret vars (excluded from version control) ├── README.md # Setup and usage guide ├── report.md # Summary and learnings └── screenshots/ # Optional screenshots
+1. **VPC**: A custom VPC was created with public and private subnets.
+2. **ECS Cluster**: An ECS cluster named `prefect-cluster` was set up for running containers.
+3. **IAM Role**: Created IAM roles for ECS execution with necessary permissions for accessing Secrets Manager.
+4. **Secrets Manager**: Stored the Prefect API key securely to be accessed by the worker.
+5. **ECS Task**: A Prefect worker container was deployed to run in the ECS cluster using Fargate.
+6. **Service Discovery**: Registered the ECS service in **Cloud Map** to allow communication with Prefect Cloud.
 
-markdown
-Copy
-Edit
+## Terraform Configuration
 
-## Before You Start
+The infrastructure was defined using the following Terraform files:
 
-Make sure you have:
+- `main.tf`: Contains the core Terraform resources like VPC, ECS cluster, IAM roles, etc.
+- `variables.tf`: Defines the input variables such as Prefect credentials.
+- `outputs.tf`: Defines the output values after the Terraform apply process.
+- `terraform.tfvars`: Contains sensitive values like Prefect API key, account ID, and workspace ID (never committed to the repository).
 
-- An AWS account with permissions to create VPC, ECS, IAM roles, etc.
-- Terraform installed (v1.2 or above)
-- AWS CLI installed and configured (`aws configure`)
-- A Prefect Cloud account with:
-  - API key
-  - Account ID
-  - Workspace ID
-  - A work pool named: `ecs-work-pool`
+## Process Flow
 
-## Secret Values
+1. **Repository Clone**: The repository was cloned to the local environment.
+2. **Secrets Configuration**: Prefect API details were added to the `terraform.tfvars` file.
+3. **Terraform Initialization**: Ran `terraform init` to initialize the Terraform environment.
+4. **Plan and Apply**: Used `terraform plan` to check the changes and `terraform apply` to deploy the resources.
+5. **Verification**:
+   - In AWS Console, the ECS worker service was confirmed to be running.
+   - In Prefect Cloud, the worker was verified to be healthy and registered in the `ecs-work-pool`.
 
-Before applying the configuration, create a `terraform.tfvars` file in the root directory with the following:
+## Challenges Faced
 
-```hcl
-prefect_api_key       = "your-prefect-api-key"
-prefect_account_id    = "your-account-id"
-prefect_workspace_id  = "your-workspace-id"
-This file should not be committed to version control. It’s already ignored in .gitignore.
+1. **Secrets Management**: Ensuring that the Prefect API key was securely stored and managed in AWS Secrets Manager.
+2. **Service Discovery**: Setting up ECS service discovery with AWS Cloud Map to allow communication between ECS and Prefect Cloud.
+3. **ECS Task Execution**: Ensuring the ECS Fargate task was properly configured and able to connect to the Prefect Cloud workspace.
 
-Deployment Steps
-1. Clone the repository
-bash
-Copy
-Edit
-git clone https://github.com/your-username/prefect-ecs-iac.git
-cd prefect-ecs-iac
-2. Initialize Terraform
-bash
-Copy
-Edit
-terraform init
-3. Preview changes
-bash
-Copy
-Edit
-terraform plan
-4. Deploy the infrastructure
-bash
-Copy
-Edit
-terraform apply
-Terraform will provision:
+## Conclusion
 
-A new VPC with public and private subnets
+This project successfully set up a serverless infrastructure for running Prefect workflows on AWS ECS Fargate using Terraform. By automating the process with Infrastructure as Code, the deployment became scalable, secure, and reproducible. This also enhanced my understanding of integrating various AWS services with Prefect Cloud for workflow orchestration.
 
-ECS Cluster named prefect-cluster
+## Future Improvements
 
-NAT Gateway and Internet Gateway
+- **Auto-scaling**: Set up auto-scaling for the ECS service to automatically adjust resources based on workload.
+- **CloudWatch Integration**: Set up **CloudWatch Logs** for better monitoring and troubleshooting.
+- **CI/CD Integration**: Automate deployment using **GitHub Actions** or **CircleCI** for continuous integration and delivery.
+- **Terraform Modules**: Break down the Terraform configuration into reusable modules for better organization and maintainability.
 
-Task execution IAM role
+## Author
 
-Prefect worker in ECS Fargate (dev-worker)
+**Inish Kashyap**
 
-Secrets Manager entry with your Prefect API key
-
-Verifying the Deployment
-In AWS Console
-Navigate to ECS > Clusters > prefect-cluster
-Ensure that the dev-worker service is running
-
-In Secrets Manager, confirm the prefect-api-key exists
-
-In Cloud Map, check for the namespace default.prefect.local
-
-In Prefect Cloud
-Log in to Prefect Cloud
-
-Navigate to your workspace
-
-Open the work pool ecs-work-pool
-
-You should see a worker named dev-worker online and healthy
-
-Optional: Run a Sample Flow
-To test the setup, try running a small flow like this:
-
-python
-Copy
-Edit
-from prefect import flow
-
-@flow
-def test():
-    print("Hello from ECS!")
-
-test()
-Schedule it using the ecs-work-pool and it should be picked up by the worker running in ECS.
-
-Cleanup
-Once done, you can destroy all the resources with:
-
-bash
-Copy
-Edit
-terraform destroy
-If the secret is still in "scheduled for deletion" status, you may need to remove it manually from the AWS console before reapplying.
-
-Possible Improvements
-If given more time, the following improvements could be added:
-
-Auto-scaling based on task load
-
-CloudWatch integration for logging and monitoring
-
-Using ALB for API-based flows
-
-Splitting resources into Terraform modules for reusability
-
-CI/CD integration for continuous infrastructure updates
-
-About the Author
-Hi, I’m Inish Kashyap. This project was a great opportunity to apply DevOps principles and hands-on experience with IaC tools like Terraform, while also learning how Prefect integrates into cloud-native workflows.
-
-Feel free to connect if you’d like to discuss this project or give feedback.
-
-GitHub: inishkashyap
-
-Email: inish@example.com
-
-Thanks for reading!
-
-yaml
-Copy
-Edit
-
----
-
-Let me know if you’d like to include this inside a repo or zip, or if you want me to polish up the **`report.md`** next!
+Feel free to connect:
+- GitHub: [inishkashyap](https://github.com/inishkashyap)
+- Email: [inish@example.com](mailto:inish@example.com)
