@@ -168,7 +168,3 @@ resource "aws_secretsmanager_secret_version" "prefect_api_key" {
   secret_id     = aws_secretsmanager_secret.prefect_api_key.id
   secret_string = var.prefect_api_key
 }
-
-output "ecs_cluster_arn" {
-  value = aws_ecs_cluster.prefect_cluster.arn
-}
