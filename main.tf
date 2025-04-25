@@ -101,3 +101,14 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private.id
 }
 
+resource "aws_ecs_cluster" "prefect_cluster" {
+  name = "prefect-cluster"
+}
+
+resource "aws_service_discovery_private_dns_namespace" "prefect_service_discovery" {
+  name        = "default.prefect.local"
+  vpc         = aws_vpc.prefect_vpc.id
+  description = "Prefect service discovery namespace"
+}
+
+
