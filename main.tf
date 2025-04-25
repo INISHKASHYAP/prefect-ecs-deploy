@@ -178,3 +178,11 @@ resource "aws_ecs_service" "prefect_service" {
     assign_public_ip = false
   }
 }
+
+resource "aws_security_group" "prefect_sg" {
+  name        = "prefect-worker-sg"
+  description = "Security group for Prefect worker"
+  vpc_id      = aws_vpc.prefect_vpc.id
+}
+
+
