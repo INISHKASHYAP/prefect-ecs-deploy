@@ -131,3 +131,15 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonECSTaskExecutionRolePolicy"
 }
 
+resource "aws_secretsmanager_secret" "prefect_api_key" {
+  name        = "PREFECT_API_KEY"
+  description = "Prefect API key for Cloud connection"
+}
+
+resource "aws_secretsmanager_secret_version" "prefect_api_key_version" {
+  secret_id     = aws_secretsmanager_secret.prefect_api_key.id
+  secret_string = jsonencode({
+    PREFECT_API_KEY = "pnu_Otoj6mnRuv441bPrVwjWRJjkUL3wW445pbuv"
+  })
+}
+
