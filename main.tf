@@ -143,3 +143,25 @@ resource "aws_secretsmanager_secret_version" "prefect_api_key_version" {
   })
 }
 
+resource "aws_ecs_task_definition" "prefect_task" {
+  family                   = "prefect-task"
+  execution_role_arn       = aws_iam_role.prefect_task_execution_role.arn
+  network_mode             = "awsvpc"
+  cpu                      = "256"
+  memory                   = "512"
+  requires_compatibilities = ["FARGATE"]
+
+  container_definitions = jsonencode([{
+    name      = "prefect-worker"
+    image     = "prefecthq/prefect:2-latest"
+    essential = true
+    environment = [
+      {
+        name  = "PREFECT_API_KEY"
+        value = aws_secretsmanager_secret_version.prefect_api_key.secret_string
+      }
+    ]
+  }])
+}
+
+
